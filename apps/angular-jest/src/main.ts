@@ -1,13 +1,25 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { OktaAuthModule, OKTA_CONFIG } from '@okta/okta-angular';
+import OktaAuth from '@okta/okta-auth-js';
 
-import { AppModule } from './app/app.module';
+import { AppComponent } from './app/app.component';
+import { oktaConfig } from './app/app.config';
 import { environment } from './environments/environment';
 
 if (environment.production) {
   enableProdMode();
 }
 
-platformBrowserDynamic()
-  .bootstrapModule(AppModule)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    importProvidersFrom(OktaAuthModule),
+    {
+      provide: OKTA_CONFIG,
+      useFactory: () => {
+        const oktaAuth = new OktaAuth(oktaConfig.oidc);
+        return { oktaAuth };
+      },
+    },
+  ],
+});
